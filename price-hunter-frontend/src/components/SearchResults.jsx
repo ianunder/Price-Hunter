@@ -1,9 +1,8 @@
-import React, {useEffect, useState} from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 
 const SearchResults = () => {
-
   const { searchTerm } = useParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,15 +15,18 @@ const SearchResults = () => {
       try {
         setLoading(true);
 
-        const response = await axios.get(`http://localhost:3000/api/searchItem`, {
-          headers: { "Content-Type": "application/json" },
-          params: {productName: searchTerm},
-        });
-          
-        setProducts(response.data.items || []);  
+        const response = await axios.get(
+          `http://localhost:3000/api/searchItem`,
+          {
+            headers: { "Content-Type": "application/json" },
+            params: { productName: searchTerm },
+          }
+        );
+
+        setProducts(response.data.items || []);
       } catch (error) {
-        console.log("ERROR" , error)
-        setError('Failed to fetch products.');
+        console.log("ERROR", error);
+        setError("Failed to fetch products.");
       } finally {
         setLoading(false);
       }
@@ -33,9 +35,7 @@ const SearchResults = () => {
     fetchProducts();
   }, [searchTerm]);
 
-
   return (
-    
     <div className="container mt-5">
       <h2 className="text-primary mb-4">Search Results for: "{searchTerm}"</h2>
       {loading && <p>Loading...</p>}
@@ -45,7 +45,11 @@ const SearchResults = () => {
         {products.length > 0 ? (
           products.map((product) => (
             <div key={product.ean} className="col-md-4 col-sm-6 mb-4">
-              <Link to={`/product/${product.ean}`} className="text-decoration-none">
+              <Link
+                to={`/product/${product.ean}`}
+                state={{ product }}
+                className="text-decoration-none"
+              >
                 <div className="card shadow-sm text-center p-3">
                   <img
                     src={product.images[0]}

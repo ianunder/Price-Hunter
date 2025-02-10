@@ -1,20 +1,16 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  
   const handleSearch = (e) => {
-    
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/search/${encodeURIComponent(searchTerm)}`);
     }
-
-  }
+  };
 
   return (
     <div className="container d-flex flex-column align-items-center justify-content-center vh-100">
