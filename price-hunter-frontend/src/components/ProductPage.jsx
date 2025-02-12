@@ -6,9 +6,8 @@ import { useEffect, useState } from "react";
 const ProductPage = () => {
   const location = useLocation();
   const product = location.state?.product;
-  const [error, setError] = useState("");
-  const [amazonData, setAmazonData] = useState();
-  const [walmartData, setWalmartData] = useState();
+  const [loading, setLoading] = useState(true);
+  const [prices, setPrices] = useState();
 
   if (!product) {
     return <p className="text-danger">Product details not available.</p>;
@@ -19,6 +18,7 @@ const ProductPage = () => {
       if (!product) return;
 
       try {
+        setLoading(true);
         const response = await axios.get(
           `http://localhost:3000/api/productPrice`,
           {
@@ -26,11 +26,16 @@ const ProductPage = () => {
             params: { ean: product.ean, title: product.title },
           }
         );
-        setAmazonData(response.data.amazonData);
-        setWalmartData(response.data.walmartData);
+        console.log("response prices", response.data.prices);
+        const validPrices =
+          response.data.prices?.filter((item) => {
+            return item.data?.price && item.data?.productLink;
+          }) || [];
+        setPrices(validPrices);
+        console.log("valid prices", validPrices);
+        setLoading(false);
       } catch (error) {
         console.log("ERROR", error);
-        setError("Failed to fetch prices.");
       }
     };
 
@@ -51,18 +56,28 @@ const ProductPage = () => {
       <Link to="/" className="btn btn-secondary mt-3">
         Back to Search
       </Link>
-      <div>
-        <h1>Amazon Price = {amazonData?.price}</h1>
-        <Link to={amazonData?.productLink} className="btn btn-secondary mt-3">
-          Go to product
-        </Link>
-      </div>
-      <div>
-        <h1>Walmart Price = {walmartData?.price}</h1>
-        <Link to={walmartData?.productLink} className="btn btn-secondary mt-3">
-          Go to product
-        </Link>
-      </div>
+
+      {loading ? (
+        <p className="text-muted mt-4 fw-bold fs-5">
+          Loading price data, please wait...
+        </p>
+      ) : prices?.length > 0 ? (
+        prices.map((webstore, index) => (
+          <div key={index} className="mt-4">
+            <h3>
+              {webstore.shop} Price: {webstore.data.price}
+            </h3>
+            <Link
+              to={webstore.data.productLink}
+              className="btn btn-primary mt-3"
+            >
+              View on {webstore.shop}
+            </Link>
+          </div>
+        ))
+      ) : (
+        <p className="text-muted mt-4 fw-bold fs-5">No prices available.</p>
+      )}
     </div>
   );
 };

@@ -5,7 +5,6 @@ const scrapeData = async (page, siteConfig) => {
     const allProducts = [
       ...document.querySelectorAll(siteConfig.productContainerSelector),
     ];
-
     let nonSponsoredProducts;
     if (siteConfig.url === "https://www.amazon.com/s?k=") {
       nonSponsoredProducts = allProducts.filter(
@@ -48,6 +47,7 @@ const scrapeWebsite = async (siteConfig, queryParam) => {
   const url = `${siteConfig.url}${encodeURIComponent(queryParam)}`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.setJavaScriptEnabled(true);
+  page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
 
   const productData = await scrapeData(page, siteConfig);
   await browser.close();
@@ -58,7 +58,7 @@ const scrapeWebsite = async (siteConfig, queryParam) => {
 const scrapeWithFallback = async (siteConfig, ean, title) => {
   let productData = await scrapeWebsite(siteConfig, ean);
   if (!productData) {
-    console.log("No product data found with ean, trying with title...");
+    console.log("No product data found with ean, trying with title:", title);
     productData = await scrapeWebsite(siteConfig, title);
   }
 

@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from './components/HomePage'
 import SearchResults from './components/SearchResults';
 import ProductPage from './components/ProductPage'
-
+import NavBar from './components/NavBar'
 
 const App = () => {
 
@@ -11,7 +11,7 @@ const App = () => {
 
   return (
     <div>
-       
+       <NavBar></NavBar>
         <Routes>
 
                 <Route path="/" element={<HomePage/>}/>
