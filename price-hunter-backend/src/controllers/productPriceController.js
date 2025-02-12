@@ -1,23 +1,24 @@
-const scrapeAmazon = require("../scrapers/amazonScraper")
+const scrapeAmazon = require("../scrapers/amazonScraper");
+const scrapeWalmart = require("../scrapers/walmartScraper");
 
 const getPrices = async (req, res) => {
+  const { ean } = req.query;
+  const { title } = req.query;
 
-const {query} = req.query;
+  if (!ean || !title) {
+    return res.status(400).json({ error: "Missing query paramater" });
+  }
 
-if( !query ){
-  return res.status(400).json({error: "Missing query paramater"});
-}
-
-try {
-  const amazonData = await scrapeAmazon(query);
-  return res.status(200).json({ amazonData });
-} catch (error) {
-  console.error("Error scraping Amazon:", error);
-  return res.status(500).json({ error: "Failed to fetch price" });
-}
+  try {
+    const amazonData = await scrapeAmazon(ean);
+    const walmartData = await scrapeWalmart(ean, title);
+    return res.status(200).json({ amazonData, walmartData });
+  } catch (error) {
+    console.error("Error scraping:", error);
+    return res.status(500).json({ error: "Failed to fetch price" });
+  }
 };
 
 module.exports = {
-    getPrices,
-  };
-  
+  getPrices,
+};

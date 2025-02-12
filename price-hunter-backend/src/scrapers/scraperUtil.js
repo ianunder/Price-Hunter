@@ -1,37 +1,68 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require("puppeteer");
 
-const scrapeWebsite = async (siteConfig, query) => {
+const scrapeData = async (page, siteConfig) => {
+  const productData = await page.evaluate((siteConfig) => {
+    const allProducts = [
+      ...document.querySelectorAll(siteConfig.productContainerSelector),
+    ];
 
-  const url = `${siteConfig.url}${encodeURIComponent(query)}`;
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.setJavaScriptEnabled(true);
+    let nonSponsoredProducts;
+    if (siteConfig.url === "https://www.amazon.com/s?k=") {
+      nonSponsoredProducts = allProducts.filter(
+        (p) =>
+          !p
+            .querySelector("span.a-color-secondary")
+            ?.innerText.includes("Sponsored")
+      );
+    }
+    if (siteConfig.url === "https://www.walmart.com/search?q=") {
+      nonSponsoredProducts = allProducts.filter(
+        (p) => !p.querySelector("div.gray.f7")?.innerText.includes("Sponsored")
+      );
+    }
 
-  page.on('console', (msg) => console.log("PAGE LOG:", msg.text()));
-
-const productData = await page.evaluate((siteConfig) => {
-
-    const product = document.querySelector(siteConfig.titleSelector);
+    const product = nonSponsoredProducts[0] || null;
     if (!product) {
       return null;
     }
-    const title = product.innerText;
-    const price = document.querySelector(siteConfig.priceSelector)?.innerText;
-
-    const linkElement = document.querySelector(siteConfig.linkSelector)
+    const title =
+      product.querySelector(siteConfig.titleSelector)?.innerText || "No title";
+    const price =
+      product.querySelector(siteConfig.priceSelector)?.innerText || "No price";
+    const linkElement = product.querySelector(siteConfig.linkSelector);
     let productLink = linkElement ? linkElement.getAttribute("href") : null;
-    if (productLink && !productLink.startsWith("http")) {
-        productLink = `https://www.amazon.com${productLink}`;
-    }
-  
+
     return { title, price, productLink };
-    
   }, siteConfig);
 
-  await browser.close();
   return productData;
 };
 
-module.exports = { scrapeWebsite };
+const scrapeWebsite = async (siteConfig, queryParam) => {
+  const browser = await puppeteer.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+  );
+
+  const url = `${siteConfig.url}${encodeURIComponent(queryParam)}`;
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.setJavaScriptEnabled(true);
+
+  const productData = await scrapeData(page, siteConfig);
+  await browser.close();
+
+  return productData;
+};
+
+const scrapeWithFallback = async (siteConfig, ean, title) => {
+  let productData = await scrapeWebsite(siteConfig, ean);
+  if (!productData) {
+    console.log("No product data found with ean, trying with title...");
+    productData = await scrapeWebsite(siteConfig, title);
+  }
+
+  return productData;
+};
+
+module.exports = { scrapeWebsite, scrapeWithFallback };

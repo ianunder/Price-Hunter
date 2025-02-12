@@ -8,6 +8,7 @@ const ProductPage = () => {
   const product = location.state?.product;
   const [error, setError] = useState("");
   const [amazonData, setAmazonData] = useState();
+  const [walmartData, setWalmartData] = useState();
 
   if (!product) {
     return <p className="text-danger">Product details not available.</p>;
@@ -22,10 +23,11 @@ const ProductPage = () => {
           `http://localhost:3000/api/productPrice`,
           {
             headers: { "Content-Type": "application/json" },
-            params: { query: product.ean },
+            params: { ean: product.ean, title: product.title },
           }
         );
         setAmazonData(response.data.amazonData);
+        setWalmartData(response.data.walmartData);
       } catch (error) {
         console.log("ERROR", error);
         setError("Failed to fetch prices.");
@@ -52,9 +54,15 @@ const ProductPage = () => {
       <div>
         <h1>Amazon Price = {amazonData?.price}</h1>
         <Link to={amazonData?.productLink} className="btn btn-secondary mt-3">
-        Go to product
+          Go to product
         </Link>
-       </div>
+      </div>
+      <div>
+        <h1>Walmart Price = {walmartData?.price}</h1>
+        <Link to={walmartData?.productLink} className="btn btn-secondary mt-3">
+          Go to product
+        </Link>
+      </div>
     </div>
   );
 };
