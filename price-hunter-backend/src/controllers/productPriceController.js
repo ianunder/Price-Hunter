@@ -1,5 +1,6 @@
 const scrapeAmazon = require("../scrapers/amazonScraper");
 const scrapeWalmart = require("../scrapers/walmartScraper");
+const scrapeTarget = require("../scrapers/targetScraper")
 
 const getPrices = async (req, res) => {
   const { ean, title } = req.query;
@@ -10,11 +11,13 @@ const getPrices = async (req, res) => {
 
   try {
     const amazonData = await scrapeAmazon(ean);
-    const walmartData = await scrapeWalmart(ean, title);
+    //const walmartData = await scrapeWalmart(ean, title);
+    const targetData = await scrapeTarget(ean);
 
     const prices = [];
     prices.push({ shop: "Amazon", data: amazonData });
-    prices.push({ shop: "Walmart", data: walmartData });
+   // prices.push({ shop: "Walmart", data: walmartData });
+    prices.push({ shop: "Target", data: targetData });
 
     return res.status(200).json({ prices });
   } catch (error) {

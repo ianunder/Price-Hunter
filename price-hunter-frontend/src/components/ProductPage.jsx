@@ -63,8 +63,11 @@ const ProductPage = () => {
         </p>
       ) : prices?.length > 0 ? (
         prices.map((webstore, index) => (
-          <div key={index} className="mt-4">
-            <h3>
+          <div
+            key={index}
+            className="mt-4 d-flex justify-content-center align-items-center"
+          >
+            <h3 className="mb-0 me-3">
               {webstore.shop} Price: {webstore.data.price}
             </h3>
             <Link
