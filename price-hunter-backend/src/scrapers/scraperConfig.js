@@ -2,7 +2,7 @@ module.exports = {
   amazon: {
     url: "https://www.amazon.com/s?k=",
     productContainerSelector: "div.puis-card-container",
-    priceSelector: "div.a-row.a-size-base.a-color-secondary span.a-color-base",
+    priceSelector: 'a[aria-describedby="price-link"] span.a-price span.a-offscreen',
     titleSelector: "div[data-cy='title-recipe'] h2 span",
     linkSelector: "div[data-cy='title-recipe'] a",
     sponsor: {

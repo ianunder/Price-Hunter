@@ -16,7 +16,7 @@ const getPrices = async (req, res) => {
 
     const prices = [];
     prices.push({ shop: "Amazon", data: amazonData });
-   // prices.push({ shop: "Walmart", data: walmartData });
+    //prices.push({ shop: "Walmart", data: walmartData });
     prices.push({ shop: "Target", data: targetData });
 
     return res.status(200).json({ prices });
